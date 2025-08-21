@@ -100,6 +100,15 @@
   margin-bottom: 0;
 }
 
+/* Nested list item styling - removes double bullets */
+.editor-nested-listitem {
+  list-style: none;
+}
+
+.editor-nested-listitem::marker {
+  content: none;
+}
+
 .editor-input p + ul,
 .editor-input p + ol,
 .editor-input ul + p,

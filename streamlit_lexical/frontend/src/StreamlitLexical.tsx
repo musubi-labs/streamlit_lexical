@@ -26,6 +26,7 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { CodeNode } from "@lexical/code"
 import { ListNode, ListItemNode } from "@lexical/list"
 import { ListPlugin } from "@lexical/react/LexicalListPlugin"
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin"
 import { LinkNode } from "@lexical/link"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { useEffect } from "react"
@@ -112,6 +113,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
               <AutoFocusPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <ListPlugin />
+              <TabIndentationPlugin />
               {/* <TreeViewPlugin /> */}
               <OnChangePlugin onChange={this.handleEditorChange} />
               {/* <EditorUpdateListener /> */}
