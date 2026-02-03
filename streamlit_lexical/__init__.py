@@ -52,6 +52,7 @@ def streamlit_lexical(
     key=None,
     overwrite=True,
     on_change=None,
+    theme=None,
 ):
     """Create a new instance of "streamlit_lexical".
 
@@ -73,6 +74,10 @@ def streamlit_lexical(
         Whether to overwrite the existing value in the editor. Default is True.
     on_change: function
         Optional callback function that is called when the editor content changes.
+    theme: dict or None
+        Optional custom theme configuration. Can be a dictionary with CSS class names
+        for different editor elements, or a preset name like "default", "dark", "minimal".
+        Example: {"text": {"bold": "my-bold-class"}, "heading": {"h1": "my-h1-class"}}
 
     Returns
     -------
@@ -91,5 +96,6 @@ def streamlit_lexical(
         key=key,
         overwrite=overwrite,
         on_change=on_change,
+        theme=theme,
     )
     return component_value
