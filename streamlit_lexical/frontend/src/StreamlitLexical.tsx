@@ -24,13 +24,138 @@ import {
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { CodeNode } from "@lexical/code"
-import { ListNode, ListItemNode } from "@lexical/list"
+import {
+  ListNode,
+  ListItemNode,
+  $isListNode,
+  $isListItemNode,
+  $createListNode,
+} from "@lexical/list"
 import { ListPlugin } from "@lexical/react/LexicalListPlugin"
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin"
 import { LinkNode } from "@lexical/link"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { useEffect } from "react"
-import { $getRoot, CLEAR_HISTORY_COMMAND } from "lexical"
+import {
+  $getRoot,
+  $createParagraphNode,
+  $isLineBreakNode,
+  CLEAR_HISTORY_COMMAND,
+} from "lexical"
+
+/**
+ * Post-processes the Lexical tree after markdown import to fix incorrectly
+ * merged list items. Lexical's markdown importer treats non-list lines
+ * immediately after a list item (without a blank line separator) as
+ * "lazy continuation lines" and appends them to the last list item via a
+ * LineBreakNode. This function detects that pattern, extracts the merged
+ * content back into separate ParagraphNodes, and splits the list as needed
+ * so the document structure matches the user's intent.
+ *
+ * This approach modifies the tree (not the markdown string), so the
+ * round-trip export produces the same markdown the user originally saved.
+ */
+function $splitMergedListItems(): void {
+  const root = $getRoot()
+  const children = [...root.getChildren()]
+
+  for (const child of children) {
+    if (!$isListNode(child)) continue
+
+    const listNode = child
+    const listType = listNode.getListType()
+    const listStart = listNode.getStart()
+    const listItems = [...listNode.getChildren()]
+
+    // Quick check: does any list item have a LineBreakNode?
+    let needsSplit = false
+    for (const item of listItems) {
+      if ($isListItemNode(item)) {
+        for (const itemChild of item.getChildren()) {
+          if ($isLineBreakNode(itemChild)) {
+            needsSplit = true
+            break
+          }
+        }
+      }
+      if (needsSplit) break
+    }
+
+    if (!needsSplit) continue
+
+    // Rebuild the document fragment that will replace this ListNode.
+    // When a ListItemNode contains a LineBreakNode we:
+    //   1. Keep everything before the first LineBreak in the list item.
+    //   2. Flush the accumulated list items into a new ListNode.
+    //   3. Turn each chunk of content between LineBreaks into a ParagraphNode.
+    // Any subsequent list items (without LineBreaks) start a fresh list.
+    const replacements: any[] = []
+    let pendingListItems: any[] = []
+
+    const flushPendingList = () => {
+      if (pendingListItems.length > 0) {
+        const newList = $createListNode(listType, listStart)
+        for (const li of pendingListItems) {
+          newList.append(li)
+        }
+        replacements.push(newList)
+        pendingListItems = []
+      }
+    }
+
+    for (const item of listItems) {
+      if (!$isListItemNode(item)) {
+        pendingListItems.push(item)
+        continue
+      }
+
+      const itemChildren = [...item.getChildren()]
+      const firstBreakIdx = itemChildren.findIndex((c) => $isLineBreakNode(c))
+
+      if (firstBreakIdx === -1) {
+        // No merged content – keep as-is
+        pendingListItems.push(item)
+        continue
+      }
+
+      // This item has merged content. Keep it (trimmed) then flush the list.
+      pendingListItems.push(item)
+      flushPendingList()
+
+      // Walk from the first LineBreak onward, creating a new ParagraphNode
+      // for each segment separated by LineBreakNodes.
+      let currentPara = $createParagraphNode()
+
+      for (let i = firstBreakIdx; i < itemChildren.length; i++) {
+        const node = itemChildren[i]
+        if ($isLineBreakNode(node)) {
+          // Flush the previous paragraph if it has content
+          if (currentPara.getChildrenSize() > 0) {
+            replacements.push(currentPara)
+          }
+          currentPara = $createParagraphNode()
+          node.remove() // remove LineBreak from the list item
+        } else {
+          currentPara.append(node) // moves the node out of the list item
+        }
+      }
+
+      if (currentPara.getChildrenSize() > 0) {
+        replacements.push(currentPara)
+      }
+    }
+
+    flushPendingList()
+
+    // Splice replacement nodes into the tree where the original list was
+    let insertPoint: any = listNode
+    for (const node of replacements) {
+      insertPoint.insertAfter(node)
+      insertPoint = node
+    }
+    listNode.remove()
+  }
+}
 
 interface State {
   editorState: string
@@ -58,13 +183,15 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
     onError: (error: Error) => {
       console.error("Lexical error:", error)
     },
-    editorState: () =>
+    editorState: () => {
       $convertFromMarkdownString(
         this.props.args.value,
         TRANSFORMERS,
         undefined,
         true
-      ),
+      )
+      $splitMergedListItems()
+    },
     nodes: [
       HorizontalRuleNode,
       HeadingNode,
@@ -158,6 +285,7 @@ function EditorContentUpdater({
       if (root.getTextContent() === "" || overwrite) {
         root.clear()
         $convertFromMarkdownString(content, TRANSFORMERS, undefined, true)
+        $splitMergedListItems()
         // Clear history to prevent undo to empty state
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined)
       }
