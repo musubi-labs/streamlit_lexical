@@ -174,8 +174,8 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   public state: State = {
     editorState: "",
   }
-  // track the markdown value to prevent unnecessary updates
   private markdownRef = { current: this.props.args.value }
+  private sentValues: string[] = [this.props.args.value]
 
   private editorConfig = {
     namespace: `MyStreamlitRichTextEditor-${this.props.args.key}`,
@@ -217,7 +217,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
           <EditorContentUpdater
             content={args.value}
             overwrite={args.overwrite}
-            currentMarkdown={this.markdownRef.current}
+            sentValues={this.sentValues}
           />
           <div className="editor-container">
             <ToolbarPlugin />
@@ -260,6 +260,10 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 
   private debouncedSetComponentValue = debounce((value: string) => {
     this.markdownRef.current = value
+    this.sentValues.push(value)
+    if (this.sentValues.length > 20) {
+      this.sentValues = this.sentValues.slice(-10)
+    }
     Streamlit.setComponentValue(value)
   }, this.props.args.debounce)
 }
@@ -267,30 +271,33 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
 function EditorContentUpdater({
   content,
   overwrite,
-  currentMarkdown,
+  sentValues,
 }: {
   content: string
   overwrite: boolean
-  currentMarkdown: string
+  sentValues: string[]
 }) {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
-    if (content === currentMarkdown) {
+    const idx = sentValues.indexOf(content)
+    if (idx !== -1) {
+      sentValues.splice(0, idx + 1)
       return
     }
+
     editor.update(() => {
       const root = $getRoot()
-      // Only set content if root is empty or overwrite is true
       if (root.getTextContent() === "" || overwrite) {
         root.clear()
         $convertFromMarkdownString(content, TRANSFORMERS, undefined, true)
         $splitMergedListItems()
-        // Clear history to prevent undo to empty state
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined)
       }
     })
-  }, [editor, content, overwrite, currentMarkdown])
+    sentValues.length = 0
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, content, overwrite])
 
   return null
 }
