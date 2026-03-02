@@ -13,7 +13,8 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import ToolbarPlugin from "./plugins/ToolbarPlugin"
 
-import theme from "./theme"
+import { getTheme } from "./themes"
+import { debounce } from "./utils"
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin"
 import {
   $convertFromMarkdownString,
@@ -168,6 +169,7 @@ interface Props {
   debounce: number
   key: string
   overwrite: boolean
+  theme?: string | object | null
 }
 
 class StreamlitLexical extends StreamlitComponentBase<State, Props> {
@@ -177,9 +179,9 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
   private markdownRef = { current: this.props.args.value }
   private sentValues: string[] = [this.props.args.value]
 
-  private editorConfig = {
+  private getEditorConfig = () => ({
     namespace: `MyStreamlitRichTextEditor-${this.props.args.key}`,
-    theme,
+    theme: getTheme(this.props.args.theme),
     onError: (error: Error) => {
       console.error("Lexical error:", error)
     },
@@ -201,7 +203,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       ListItemNode,
       LinkNode,
     ],
-  }
+  })
 
   public render = (): React.ReactNode => {
     const { theme, args } = this.props
@@ -211,9 +213,14 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
       style.borderColor = theme.primaryColor
     }
 
+    // Add theme-specific class only for preset themes (not default)
+    const themeClass = typeof args.theme === "string" && args.theme !== "default"
+      ? `streamlit-lexical-editor-${args.theme}`
+      : ""
+
     return (
-      <div style={style} className="streamlit-lexical-editor">
-        <LexicalComposer initialConfig={this.editorConfig}>
+      <div style={style} className={`streamlit-lexical-editor ${themeClass}`.trim()}>
+        <LexicalComposer initialConfig={this.getEditorConfig()}>
           <EditorContentUpdater
             content={args.value}
             overwrite={args.overwrite}
@@ -241,9 +248,7 @@ class StreamlitLexical extends StreamlitComponentBase<State, Props> {
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <ListPlugin />
               <TabIndentationPlugin />
-              {/* <TreeViewPlugin /> */}
               <OnChangePlugin onChange={this.handleEditorChange} />
-              {/* <EditorUpdateListener /> */}
             </div>
           </div>
         </LexicalComposer>
@@ -306,21 +311,5 @@ function Placeholder({ text }: { text: string }) {
   return <div className="editor-placeholder">{text}</div>
 }
 
-function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout | null = null
-
-  return function (this: any, ...args: Parameters<T>) {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-
-    timeoutId = setTimeout(() => {
-      func.apply(this, args)
-    }, delay)
-  }
-}
 
 export default withStreamlitConnection(StreamlitLexical)

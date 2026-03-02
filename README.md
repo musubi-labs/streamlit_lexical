@@ -24,7 +24,7 @@ markdown = streamlit_lexical(value="initial value in **markdown**",
                             )
 
 
-st.markdown(rich_text_dict)
+st.markdown(markdown)
 ```
 
 ## Development instructions
@@ -59,3 +59,20 @@ pip install -e ./
 ```
 
 Make sure the __init__.py file RELEASE is set to True in this case. 
+
+## Theming
+
+The component supports customizable themes. Use preset themes or define your own:
+
+```python
+# Preset theme
+markdown = streamlit_lexical(value="content", theme="dark", height=400)
+
+# Custom theme
+custom_theme = {"text": {"bold": "my-bold"}, "heading": {"h1": "my-h1"}}
+markdown = streamlit_lexical(value="content", theme=custom_theme, height=400)
+```
+
+**Available presets:** `"default"`, `"dark"`, `"minimal"`
+
+See [THEMING.md](THEMING.md) for complete documentation and examples.

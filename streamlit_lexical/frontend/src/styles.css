@@ -1,3 +1,8 @@
+/* ============================================
+   GLOBAL STYLES
+   Applied to all themes
+   ============================================ */
+
 .editor-placeholder {
   color: #ccc !important;
   overflow: hidden;
@@ -285,6 +290,11 @@ i.underline {
   background-image: url(icons/type-underline.svg);
 }
 
+/* ============================================
+   DEFAULT THEME
+   Light, clean, professional appearance
+   ============================================ */
+
 .editor-text-bold {
   font-weight: bold;
 }
@@ -316,4 +326,204 @@ i.underline {
   font-weight: bold;
   font-style: italic;
   text-decoration: underline;
+}
+
+/* ============================================
+   THEME PRESETS
+   Alternative color schemes and styles
+   ============================================ */
+
+/* -------------------------------------------
+   DARK THEME
+   Dark background for low-light environments
+   ------------------------------------------- */
+
+.streamlit-lexical-editor-dark .editor-container {
+  background-color: #1e1e1e;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.streamlit-lexical-editor-dark .editor-inner {
+  background: #1e1e1e;
+}
+
+.streamlit-lexical-editor-dark .editor-input {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  caret-color: #d4d4d4;
+}
+
+.streamlit-lexical-editor-dark * {
+  color: #d4d4d4;
+}
+
+.streamlit-lexical-editor-dark .editor-placeholder {
+  color: #666 !important;
+}
+
+.streamlit-lexical-editor-dark .toolbar {
+  background: #2d2d2d;
+  border-bottom: 1px solid #404040;
+}
+
+.streamlit-lexical-editor-dark .toolbar button.toolbar-item:hover:not([disabled]) {
+  background-color: #3e3e3e;
+}
+
+.streamlit-lexical-editor-dark .toolbar button.toolbar-item.active {
+  background-color: rgba(100, 150, 255, 0.3);
+}
+
+.streamlit-lexical-editor-dark .toolbar select.toolbar-item {
+  background-color: #2d2d2d;
+  color: #d4d4d4;
+}
+
+.streamlit-lexical-editor-dark .toolbar select.toolbar-item:hover {
+  background-color: #3e3e3e;
+}
+
+.streamlit-lexical-editor-dark .toolbar .divider {
+  background-color: #404040;
+}
+
+.streamlit-lexical-editor-dark .editor-paragraph-dark {
+  margin: 0;
+  padding: 0;
+}
+
+.streamlit-lexical-editor-dark .editor-heading-h1-dark,
+.streamlit-lexical-editor-dark .editor-heading-h2-dark,
+.streamlit-lexical-editor-dark .editor-heading-h3-dark {
+  padding: 0.25rem 0;
+  margin: 0.25rem 0;
+  color: #e0e0e0;
+}
+
+.streamlit-lexical-editor-dark .editor-heading-h1-dark {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.streamlit-lexical-editor-dark .editor-heading-h2-dark {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.streamlit-lexical-editor-dark .editor-heading-h3-dark {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.streamlit-lexical-editor-dark .editor-link-dark {
+  color: #4db8ff;
+  text-decoration: underline;
+}
+
+.streamlit-lexical-editor-dark .editor-quote-dark {
+  border-left: 4px solid #666;
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: #aaa;
+}
+
+.streamlit-lexical-editor-dark .editor-code-dark {
+  background-color: #2d2d2d;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: monospace;
+  color: #ce9178;
+}
+
+/* -------------------------------------------
+   MINIMAL THEME
+   Clean, simple design with reduced styling
+   ------------------------------------------- */
+
+.streamlit-lexical-editor-minimal .editor-container {
+  box-shadow: none;
+  border: 1px solid #e0e0e0;
+}
+
+.streamlit-lexical-editor-minimal .toolbar {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 4px 6px;
+}
+
+.streamlit-lexical-editor-minimal .toolbar button.toolbar-item {
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.streamlit-lexical-editor-minimal .toolbar button.toolbar-item:hover:not([disabled]) {
+  background-color: #f5f5f5;
+}
+
+.streamlit-lexical-editor-minimal .toolbar button.toolbar-item.active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.streamlit-lexical-editor-minimal .editor-input {
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 1rem;
+}
+
+.streamlit-lexical-editor-minimal .editor-placeholder {
+  color: #999 !important;
+  font-size: 15px;
+  top: 1rem;
+  left: 1rem;
+}
+
+.streamlit-lexical-editor-minimal .editor-heading-h1-minimal,
+.streamlit-lexical-editor-minimal .editor-heading-h2-minimal,
+.streamlit-lexical-editor-minimal .editor-heading-h3-minimal {
+  margin: 0.5rem 0;
+  padding: 0;
+  font-weight: 600;
+}
+
+.streamlit-lexical-editor-minimal .editor-heading-h1-minimal {
+  font-size: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.3rem;
+}
+
+.streamlit-lexical-editor-minimal .editor-heading-h2-minimal {
+  font-size: 20px;
+}
+
+.streamlit-lexical-editor-minimal .editor-heading-h3-minimal {
+  font-size: 18px;
+}
+
+.streamlit-lexical-editor-minimal .editor-paragraph-minimal {
+  margin: 0.5rem 0;
+}
+
+.streamlit-lexical-editor-minimal .editor-quote-minimal {
+  border-left: 3px solid #ddd;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #666;
+}
+
+.streamlit-lexical-editor-minimal .editor-link-minimal {
+  color: #0066cc;
+  text-decoration: none;
+  border-bottom: 1px solid #0066cc;
+}
+
+.streamlit-lexical-editor-minimal .editor-link-minimal:hover {
+  border-bottom-width: 2px;
+}
+
+.streamlit-lexical-editor-minimal .editor-code-minimal {
+  background-color: #f5f5f5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: "Monaco", "Courier New", monospace;
+  font-size: 0.9em;
 }
